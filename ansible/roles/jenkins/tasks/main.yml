@@ -4,24 +4,18 @@
     state: present
     update_cache: yes
 
-- name: Install dependencies
-  apt:
-    name:
-      - curl
-      - gnupg
-    state: present
-    update_cache: yes
-
-- name: Create keyring directory
+- name: Remove old Jenkins repo if exists
   file:
-    path: /usr/share/keyrings
-    state: directory
-    mode: '0755'
+    path: /etc/apt/sources.list.d/jenkins.list
+    state: absent
 
-- name: Add Jenkins GPG key
-  shell: |
-    curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | \
-    gpg --dearmor -o /usr/share/keyrings/jenkins-keyring.gpg
+- name: Download Jenkins GPG key
+  get_url:
+    url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+    dest: /tmp/jenkins.key
+
+- name: Convert Jenkins key to keyring
+  command: gpg --dearmor -o /usr/share/keyrings/jenkins-keyring.gpg /tmp/jenkins.key
   args:
     creates: /usr/share/keyrings/jenkins-keyring.gpg
 
@@ -29,15 +23,15 @@
   apt_repository:
     repo: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.gpg] https://pkg.jenkins.io/debian-stable binary/"
     state: present
+    filename: jenkins
 
 - name: Install Jenkins
   apt:
     name: jenkins
     state: present
-    update_cache: yes
 
-- name: Start Jenkins
+- name: Start Jenkins service
   service:
     name: jenkins
     state: started
-    enabled: true
+    enabled: yes
