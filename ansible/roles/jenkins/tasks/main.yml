@@ -1,36 +1,34 @@
-- name: Install Java 17
+- name: Install required packages
   apt:
-    name: openjdk-17-jdk
+    name:
+      - curl
+      - gnupg
+      - openjdk-17-jdk
     state: present
     update_cache: yes
 
-- name: Remove old Jenkins repo if exists
-  file:
-    path: /etc/apt/sources.list.d/jenkins.list
-    state: absent
-
-- name: Download Jenkins GPG key
+- name: Download Jenkins 2026 key
   get_url:
-    url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
-    dest: /tmp/jenkins.key
-
-- name: Convert Jenkins key to keyring
-  command: gpg --dearmor -o /usr/share/keyrings/jenkins-keyring.gpg /tmp/jenkins.key
-  args:
-    creates: /usr/share/keyrings/jenkins-keyring.gpg
+    url: https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
+    dest: /usr/share/keyrings/jenkins-keyring.asc
+    mode: '0644'
 
 - name: Add Jenkins repository
   apt_repository:
-    repo: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.gpg] https://pkg.jenkins.io/debian-stable binary/"
-    state: present
+    repo: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/"
     filename: jenkins
+    state: present
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
 
 - name: Install Jenkins
   apt:
     name: jenkins
     state: present
 
-- name: Start Jenkins service
+- name: Start Jenkins
   service:
     name: jenkins
     state: started
