@@ -1,0 +1,10 @@
+- name: Install kubectl
+  apt:
+    name: kubectl
+    state: present
+    update_cache: yes
+
+- name: Install GKE auth plugin
+  apt:
+    name: google-cloud-sdk-gke-gcloud-auth-plugin
+    state: present

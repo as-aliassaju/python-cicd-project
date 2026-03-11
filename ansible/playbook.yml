@@ -6,4 +6,5 @@
     - jenkins
     - docker
     - terraform
+    - gcp-tools
     
