@@ -5,3 +5,5 @@
     - common
     - jenkins
     - docker
+    - terraform
+    
